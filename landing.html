@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clicker Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(to bottom, #ff7e5f, #feb47b);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+
+        .header img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .game {
+            margin-top: 20px;
+        }
+
+        #click-button {
+            background: #ff5722;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 20px;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+
+        #click-button:hover {
+            background: #e64a19;
+        }
+
+        #logout-btn {
+            background: #555;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        #logout-btn:hover {
+            background: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <img id="profile-pic" src="default-profile.png" alt="Profile Picture">
+        <h1 id="welcome-message">Hello, User</h1>
+    </div>
+
+    <div class="container">
+        <h2>Clicker Game</h2>
+        <p>Click the button to earn points!</p>
+        <h3>Score: <span id="score">0</span></h3>
+        <button id="click-button">Click Me!</button>
+        <button id="logout-btn">Log Out</button>
+    </div>
+
+    <script>
+        // Load user data from localStorage
+        const userData = JSON.parse(localStorage.getItem("user"));
+        if (userData) {
+            document.getElementById("profile-pic").src = userData.profilePic;
+            document.getElementById("welcome-message").textContent = `Hello, ${userData.name}`;
+        } else {
+            window.location.href = "index.html"; // Redirect if not logged in
+        }
+
+        // Unique storage key for user
+        const userKey = `clicker-score-${userData.email}`;
+        let score = parseInt(localStorage.getItem(userKey)) || 0;
+        document.getElementById("score").textContent = score;
+
+        // Clicker game logic
+        document.getElementById("click-button").addEventListener("click", () => {
+            score++;
+            document.getElementById("score").textContent = score;
+            localStorage.setItem(userKey, score); // Save progress
+        });
+
+        // Logout function
+        document.getElementById("logout-btn").addEventListener("click", () => {
+            localStorage.removeItem("user"); // Clear user session
+            window.location.href = "index.html"; // Redirect to login
+        });
+    </script>
+
+</body>
+</html>
