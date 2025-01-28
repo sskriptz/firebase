@@ -91,33 +91,48 @@
     </div>
 
     <script>
-        // Load user data from localStorage
-        const userData = JSON.parse(localStorage.getItem("user"));
-        if (userData) {
+    // Import Firebase
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+
+    // Firebase authentication check
+    const auth = getAuth();
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // If user is logged in, display user info and game
+            const userData = {
+                name: user.displayName || "User",
+                email: user.email,
+                profilePic: user.photoURL || "default-profile.png"
+            };
             document.getElementById("profile-pic").src = userData.profilePic;
             document.getElementById("welcome-message").textContent = `Hello, ${userData.name}`;
-        } else {
-            window.location.href = "index.html"; // Redirect if not logged in
-        }
 
-        // Unique storage key for user
-        const userKey = `clicker-score-${userData.email}`;
-        let score = parseInt(localStorage.getItem(userKey)) || 0;
-        document.getElementById("score").textContent = score;
-
-        // Clicker game logic
-        document.getElementById("click-button").addEventListener("click", () => {
-            score++;
+            // Use localStorage to store user data for the game progress
+            const userKey = `clicker-score-${user.email}`;
+            let score = parseInt(localStorage.getItem(userKey)) || 0;
             document.getElementById("score").textContent = score;
-            localStorage.setItem(userKey, score); // Save progress
-        });
 
-        // Logout function
-        document.getElementById("logout-btn").addEventListener("click", () => {
-            localStorage.removeItem("user"); // Clear user session
-            window.location.href = "index.html"; // Redirect to login
-        });
-    </script>
+            // Game logic
+            document.getElementById("click-button").addEventListener("click", () => {
+                score++;
+                document.getElementById("score").textContent = score;
+                localStorage.setItem(userKey, score); // Save progress
+            });
+
+        } else {
+            // If the user is not logged in, redirect to the login page
+            window.location.href = "index.html";
+        }
+    });
+
+    // Logout function
+    document.getElementById("logout-btn").addEventListener("click", () => {
+        localStorage.removeItem("user"); // Clear user session
+        window.location.href = "index.html"; // Redirect to login
+    });
+</script>
+
 
 </body>
 </html>
