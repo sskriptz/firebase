@@ -25,16 +25,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// Check if the user is logged in and handle redirection on page load
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // If logged in, redirect to homepage or dashboard without `.html`
-    window.location.replace("/firebase"); // Redirecting without `.html`
-  } else {
-    console.log("No user is signed in.");
-  }
-});
-
 // Function to handle successful login
 function handleLogin(user) {
   // Store user data in localStorage
@@ -46,6 +36,16 @@ function handleLogin(user) {
   // Redirect to the home/dashboard page without `.html`
   window.location.replace("/firebase"); // Redirecting without `.html`
 }
+
+// Check if the user is logged in and handle redirection on page load
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // If logged in, redirect to homepage or dashboard without `.html`
+    window.location.replace("/firebase"); // Redirecting without `.html`
+  } else {
+    console.log("No user is signed in.");
+  }
+});
 
 // Sign Up / Sign In Handling
 document.getElementById("auth-form").addEventListener("submit", async (e) => {
