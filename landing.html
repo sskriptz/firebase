@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(to bottom, #ff7e5f, #feb47b);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .profile img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+
+        #logout-btn {
+            background: #ff5722;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+        #logout-btn:hover {
+            background: #e64a19;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="profile">
+            <img id="profile-pic" src="default-profile.png" alt="Profile Picture">
+            <h1 id="welcome-message">Hello, User</h1>
+        </div>
+        <button id="logout-btn">Log Out</button>
+    </div>
+
+    <script>
+        // Load user data from localStorage
+        const userData = JSON.parse(localStorage.getItem("user"));
+        if (userData) {
+            document.getElementById("profile-pic").src = userData.profilePic;
+            document.getElementById("welcome-message").textContent = `Hello, ${userData.name}`;
+        } else {
+            window.location.href = "index.html"; // Redirect if not logged in
+        }
+
+        // Log out function
+        document.getElementById("logout-btn").addEventListener("click", () => {
+            localStorage.removeItem("user"); // Clear user data
+            window.location.href = "index.html"; // Redirect to login
+        });
+    </script>
+</body>
+</html>
