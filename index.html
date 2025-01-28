@@ -3,104 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Firebase Auth - Login & Sign Up</title>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <style>
-    /* General Styles */
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 400px;
-      margin: 50px auto;
-      text-align: center;
-      background-color: #f9f9f9;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    h1 {
-      font-size: 1.8rem;
-      color: #333;
-    }
-
-    form {
-      margin: 20px 0;
-    }
-
-    input {
-      display: block;
-      margin: 10px auto;
-      padding: 10px;
-      width: 80%;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-
-    button {
-      padding: 10px 20px;
-      margin: 10px auto;
-      background-color: #007BFF;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    a {
-      color: #007BFF;
-      text-decoration: none;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    .status {
-      margin-top: 20px;
-      font-weight: bold;
-    }
-
-    .success {
-      color: green;
-    }
-
-    .error {
-      color: red;
-    }
-  </style>
+  <title>Sign In / Sign Up</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="app.js"></script>
 </head>
 <body>
-  <h1>Firebase Authentication</h1>
-  
-  <!-- Login Page -->
-  <div id="loginPage">
-    <h2>Login</h2>
-    <form id="loginForm">
+  <div class="auth-container">
+    <h1 id="form-title">Sign In</h1>
+
+    <!-- Google Sign-In Button -->
+    <button class="google-btn" id="google-auth">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRkRFuG-FebXK8BQPEo80Ai_KGWyMPm6UT6w&s" alt="Google Logo">
+      Continue with Google
+    </button>
+
+    <!-- Separator -->
+    <div class="separator"><span>OR</span></div>
+
+    <!-- Email/Password Form -->
+    <form id="auth-form">
       <input type="email" id="email" placeholder="Email" required>
       <input type="password" id="password" placeholder="Password" required>
-      <button type="submit">Login</button>
+      <button type="submit" class="auth-btn">Sign In</button>
     </form>
-    <p>Don't have an account? <a href="#" id="goToSignup">Sign up</a></p>
-    <p class="status" id="loginStatus"></p>
-  </div>
 
-  <!-- Sign-Up Page -->
-  <div id="signupPage" style="display: none;">
-    <h2>Sign Up</h2>
-    <form id="signupForm">
-      <input type="email" id="signupEmail" placeholder="Email" required>
-      <input type="password" id="signupPassword" placeholder="Password" required>
-      <button type="submit">Sign Up</button>
-    </form>
-    <p>Already have an account? <a href="#" id="goToLogin">Log in</a></p>
-    <p class="status" id="signupStatus"></p>
+    <!-- Toggle Sign Up / Sign In -->
+    <p id="toggle-text">Don't have an account? <a href="#" id="toggle-auth">Sign Up</a></p>
+    
+    <p id="error-message"></p>
   </div>
 </body>
 </html>
