@@ -5,7 +5,9 @@ import {
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signInWithPopup, 
-  GoogleAuthProvider 
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signOut
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 
 // Firebase configuration
@@ -23,59 +25,44 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// Get Form Elements
-const authForm = document.getElementById("auth-form");
-const googleAuthBtn = document.getElementById("google-auth");
-const formTitle = document.getElementById("form-title");
-const authBtn = document.querySelector(".auth-btn");
-const toggleText = document.getElementById("toggle-text");
-const errorMessage = document.getElementById("error-message");
+// Function to handle successful login
+function handleLogin(user) {
+  // Store user data in localStorage
+  localStorage.setItem("user", JSON.stringify({
+    name: user.displayName || "User",
+    email: user.email,
+    profilePic: user.photoURL || "default-profile.png"
+  }));
+  // Redirect to landing page
+  window.location.href = "landing.html";
+}
 
-let isSignUp = false;
-
-// 🛠 Fix: Ensure event listeners persist even after HTML changes
-document.addEventListener("click", (e) => {
-  if (e.target.id === "toggle-auth") {
-    e.preventDefault();
-    isSignUp = !isSignUp;
-    formTitle.textContent = isSignUp ? "Sign Up" : "Sign In";
-    authBtn.textContent = isSignUp ? "Sign Up" : "Sign In";
-    toggleText.innerHTML = isSignUp
-      ? `Already have an account? <a href="#" id="toggle-auth">Sign In</a>`
-      : `Don't have an account? <a href="#" id="toggle-auth">Sign Up</a>`;
-  }
-});
-
-// 🛠 Fix: Ensure form submission is handled properly
-authForm.addEventListener("submit", async (e) => {
-  e.preventDefault(); // Prevent default form behavior
+// Sign Up / Sign In Handling
+document.getElementById("auth-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
   
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
-  
+
   try {
     if (isSignUp) {
-      // 🔥 Sign Up with Email/Password
-      await createUserWithEmailAndPassword(auth, email, password);
-      alert("✅ Account created successfully!");
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      handleLogin(userCredential.user);
     } else {
-      // 🔥 Sign In with Email/Password
-      await signInWithEmailAndPassword(auth, email, password);
-      alert("✅ Login successful!");
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      handleLogin(userCredential.user);
     }
   } catch (error) {
-    errorMessage.textContent = "❌ Error: " + error.message;
-    console.error(error);
+    document.getElementById("error-message").textContent = "❌ Error: " + error.message;
   }
 });
 
-// 🔥 Google Authentication
-googleAuthBtn.addEventListener("click", async () => {
+// Google Authentication
+document.getElementById("google-auth").addEventListener("click", async () => {
   try {
-    await signInWithPopup(auth, provider);
-    alert("✅ Google Sign-In successful!");
+    const result = await signInWithPopup(auth, provider);
+    handleLogin(result.user);
   } catch (error) {
-    errorMessage.textContent = "❌ Google Sign-In Error: " + error.message;
-    console.error(error);
+    document.getElementById("error-message").textContent = "❌ Google Sign-In Error: " + error.message;
   }
 });
