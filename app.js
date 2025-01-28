@@ -25,6 +25,16 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
+// Check if the user is logged in and handle redirection on page load
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // If logged in, redirect to homepage or dashboard without `.html`
+    window.location.replace("/firebase"); // Redirecting without `.html`
+  } else {
+    console.log("No user is signed in.");
+  }
+});
+
 // Function to handle successful login
 function handleLogin(user) {
   // Store user data in localStorage
@@ -33,22 +43,26 @@ function handleLogin(user) {
     email: user.email,
     profilePic: user.photoURL || "default-profile.png"
   }));
-  // Redirect to landing page
-  window.location.href = "landing.html";
+  // Redirect to the home/dashboard page without `.html`
+  window.location.replace("/firebase"); // Redirecting without `.html`
 }
 
 // Sign Up / Sign In Handling
 document.getElementById("auth-form").addEventListener("submit", async (e) => {
   e.preventDefault();
-  
+
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
   try {
+    const isSignUp = document.getElementById("isSignUp").checked; // Assuming you have a checkbox to toggle sign-up/login
+
     if (isSignUp) {
+      // Sign Up
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       handleLogin(userCredential.user);
     } else {
+      // Login
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       handleLogin(userCredential.user);
     }
@@ -64,5 +78,17 @@ document.getElementById("google-auth").addEventListener("click", async () => {
     handleLogin(result.user);
   } catch (error) {
     document.getElementById("error-message").textContent = "❌ Google Sign-In Error: " + error.message;
+  }
+});
+
+// Handle Logout
+document.getElementById("logout").addEventListener("click", async () => {
+  try {
+    await signOut(auth);
+    localStorage.removeItem("user"); // Remove user data from localStorage
+    // Redirect to login page after logout
+    window.location.replace("/firebase/login"); // Redirect to the login page without `.html`
+  } catch (error) {
+    console.error("Logout error:", error.message);
   }
 });
