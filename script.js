@@ -25,10 +25,10 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// Function to handle successful login and set up the user session
+// Function to handle successful login
 function handleLogin(user) {
-  // Store user data in session (not localStorage)
-  sessionStorage.setItem("user", JSON.stringify({
+  // Store user data in localStorage
+  localStorage.setItem("user", JSON.stringify({
     name: user.displayName || "User",
     email: user.email,
     profilePic: user.photoURL || "default-profile.png"
@@ -37,28 +37,7 @@ function handleLogin(user) {
   window.location.href = "landing.html";
 }
 
-// Google Authentication
-document.getElementById("google-auth").addEventListener("click", async () => {
-  try {
-    const result = await signInWithPopup(auth, provider);
-    handleLogin(result.user);
-  } catch (error) {
-    document.getElementById("error-message").textContent = "❌ Google Sign-In Error: " + error.message;
-  }
-});
-
-// Check if the user is already signed in when the page loads
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // User is signed in, redirect to landing page
-    handleLogin(user);
-  } else {
-    // User is not signed in, stay on the sign-in page
-    document.getElementById("error-message").textContent = "Please sign in to continue.";
-  }
-});
-
-// Sign Up / Sign In Handling for email/password
+// Sign Up / Sign In Handling
 document.getElementById("auth-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   
@@ -66,8 +45,6 @@ document.getElementById("auth-form").addEventListener("submit", async (e) => {
   const password = document.getElementById("password").value;
 
   try {
-    const isSignUp = document.getElementById("form-title").textContent === "Sign Up";
-    
     if (isSignUp) {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       handleLogin(userCredential.user);
@@ -80,13 +57,12 @@ document.getElementById("auth-form").addEventListener("submit", async (e) => {
   }
 });
 
-// Sign Out
-document.getElementById("logout-btn")?.addEventListener("click", async () => {
+// Google Authentication
+document.getElementById("google-auth").addEventListener("click", async () => {
   try {
-    await signOut(auth);
-    sessionStorage.removeItem("user"); // Clear session data
-    window.location.href = "index.html"; // Redirect to login page
+    const result = await signInWithPopup(auth, provider);
+    handleLogin(result.user);
   } catch (error) {
-    console.error("Error signing out: ", error.message);
+    document.getElementById("error-message").textContent = "❌ Google Sign-In Error: " + error.message;
   }
 });
