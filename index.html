@@ -3,40 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Firebase Auth</title>
+  <title>Firebase Auth - Login & Sign Up</title>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <style>
+    /* General Styles */
     body {
       font-family: Arial, sans-serif;
       max-width: 400px;
       margin: 50px auto;
       text-align: center;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
+
+    h1 {
+      font-size: 1.8rem;
+      color: #333;
+    }
+
     form {
       margin: 20px 0;
     }
+
     input {
       display: block;
       margin: 10px auto;
       padding: 10px;
       width: 80%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
     }
+
     button {
       padding: 10px 20px;
       margin: 10px auto;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
       cursor: pointer;
+      transition: background-color 0.3s ease;
     }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    a {
+      color: #007BFF;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
     .status {
       margin-top: 20px;
       font-weight: bold;
+    }
+
+    .success {
+      color: green;
+    }
+
+    .error {
+      color: red;
     }
   </style>
 </head>
 <body>
   <h1>Firebase Authentication</h1>
   
-  <!-- Login Form -->
+  <!-- Login Page -->
   <div id="loginPage">
     <h2>Login</h2>
     <form id="loginForm">
@@ -48,7 +91,7 @@
     <p class="status" id="loginStatus"></p>
   </div>
 
-  <!-- Sign-Up Form -->
+  <!-- Sign-Up Page -->
   <div id="signupPage" style="display: none;">
     <h2>Sign Up</h2>
     <form id="signupForm">
@@ -59,7 +102,5 @@
     <p>Already have an account? <a href="#" id="goToLogin">Log in</a></p>
     <p class="status" id="signupStatus"></p>
   </div>
-
-  <script src="app.js"></script>
 </body>
 </html>
