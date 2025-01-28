@@ -1,76 +1,70 @@
+// Import Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+
 // Firebase configuration
-var firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
+const firebaseConfig = {
+  apiKey: "AIzaSyB_1k5m_Xvz_JPlZ_9ZOR52UJUQWZKxfxo",
+  authDomain: "login-1ca6e.firebaseapp.com",
+  projectId: "login-1ca6e",
+  storageBucket: "login-1ca6e.firebasestorage.app",
+  messagingSenderId: "230736267753",
+  appId: "1:230736267753:web:ddd5e59c36a6e360136378"
 };
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
-// Get elements
-const loginPage = document.getElementById("loginPage");
-const signupPage = document.getElementById("signupPage");
-const loginForm = document.getElementById("loginForm");
-const signupForm = document.getElementById("signupForm");
-const loginStatus = document.getElementById("loginStatus");
-const signupStatus = document.getElementById("signupStatus");
+// Form Elements
+const authForm = document.getElementById("auth-form");
+const googleAuthBtn = document.getElementById("google-auth");
+const formTitle = document.getElementById("form-title");
+const authBtn = document.querySelector(".auth-btn");
+const toggleText = document.getElementById("toggle-text");
+const errorMessage = document.getElementById("error-message");
 
-// Switch to Sign-Up Page
-document.getElementById("goToSignup").addEventListener("click", (e) => {
-  e.preventDefault(); // Prevent default link behavior
-  loginPage.style.display = "none"; // Hide login form
-  signupPage.style.display = "block"; // Show signup form
+let isSignUp = false;
+
+// 🛠 Fix: Use event delegation to ensure the toggle works
+document.addEventListener("click", (e) => {
+  if (e.target.id === "toggle-auth") {
+    e.preventDefault();
+    isSignUp = !isSignUp;
+    formTitle.textContent = isSignUp ? "Sign Up" : "Sign In";
+    authBtn.textContent = isSignUp ? "Sign Up" : "Sign In";
+    toggleText.innerHTML = isSignUp
+      ? `Already have an account? <a href="#" id="toggle-auth">Sign In</a>`
+      : `Don't have an account? <a href="#" id="toggle-auth">Sign Up</a>`;
+  }
 });
 
-// Switch to Login Page
-document.getElementById("goToLogin").addEventListener("click", (e) => {
-  e.preventDefault(); // Prevent default link behavior
-  signupPage.style.display = "none"; // Hide signup form
-  loginPage.style.display = "block"; // Show login form
-});
-
-// Handle Login
-loginForm.addEventListener("submit", (e) => {
+// 🔥 Fix: Ensure sign-up button works
+authForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  firebase
-    .auth()
-    .signInWithEmailAndPassword(email, password)
-    .then((userCredential) => {
-      loginStatus.textContent = "Logged in successfully!";
-      loginStatus.style.color = "green";
-      console.log("User:", userCredential.user);
-    })
-    .catch((error) => {
-      loginStatus.textContent = `Error: ${error.message}`;
-      loginStatus.style.color = "red";
-    });
+  try {
+    if (isSignUp) {
+      await createUserWithEmailAndPassword(auth, email, password);
+      alert("✅ Account created successfully!");
+    } else {
+      await signInWithEmailAndPassword(auth, email, password);
+      alert("✅ Login successful!");
+    }
+  } catch (error) {
+    errorMessage.textContent = "❌ Error: " + error.message;
+  }
 });
 
-// Handle Sign-Up
-signupForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-
-  const email = document.getElementById("signupEmail").value;
-  const password = document.getElementById("signupPassword").value;
-
-  firebase
-    .auth()
-    .createUserWithEmailAndPassword(email, password)
-    .then((userCredential) => {
-      signupStatus.textContent = "Account created successfully!";
-      signupStatus.style.color = "green";
-      console.log("User:", userCredential.user);
-    })
-    .catch((error) => {
-      signupStatus.textContent = `Error: ${error.message}`;
-      signupStatus.style.color = "red";
-    });
+// Google Authentication
+googleAuthBtn.addEventListener("click", async () => {
+  try {
+    await signInWithPopup(auth, provider);
+    alert("✅ Google Sign-In successful!");
+  } catch (error) {
+    errorMessage.textContent = "❌ Google Sign-In Error: " + error.message;
+  }
 });
