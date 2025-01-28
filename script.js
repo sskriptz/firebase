@@ -1,6 +1,14 @@
 // Import Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+import { 
+  getAuth, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signInWithPopup, 
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -17,54 +25,44 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// Form Elements
-const authForm = document.getElementById("auth-form");
-const googleAuthBtn = document.getElementById("google-auth");
-const formTitle = document.getElementById("form-title");
-const authBtn = document.querySelector(".auth-btn");
-const toggleText = document.getElementById("toggle-text");
-const errorMessage = document.getElementById("error-message");
+// Function to handle successful login
+function handleLogin(user) {
+  // Store user data in localStorage
+  localStorage.setItem("user", JSON.stringify({
+    name: user.displayName || "User",
+    email: user.email,
+    profilePic: user.photoURL || "default-profile.png"
+  }));
+  // Redirect to landing page
+  window.location.href = "landing.html";
+}
 
-let isSignUp = false;
-
-// 🛠 Fix: Use event delegation to ensure the toggle works
-document.addEventListener("click", (e) => {
-  if (e.target.id === "toggle-auth") {
-    e.preventDefault();
-    isSignUp = !isSignUp;
-    formTitle.textContent = isSignUp ? "Sign Up" : "Sign In";
-    authBtn.textContent = isSignUp ? "Sign Up" : "Sign In";
-    toggleText.innerHTML = isSignUp
-      ? `Already have an account? <a href="#" id="toggle-auth">Sign In</a>`
-      : `Don't have an account? <a href="#" id="toggle-auth">Sign Up</a>`;
-  }
-});
-
-// 🔥 Fix: Ensure sign-up button works
-authForm.addEventListener("submit", async (e) => {
+// Sign Up / Sign In Handling
+document.getElementById("auth-form").addEventListener("submit", async (e) => {
   e.preventDefault();
+  
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
   try {
     if (isSignUp) {
-      await createUserWithEmailAndPassword(auth, email, password);
-      alert("✅ Account created successfully!");
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      handleLogin(userCredential.user);
     } else {
-      await signInWithEmailAndPassword(auth, email, password);
-      alert("✅ Login successful!");
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      handleLogin(userCredential.user);
     }
   } catch (error) {
-    errorMessage.textContent = "❌ Error: " + error.message;
+    document.getElementById("error-message").textContent = "❌ Error: " + error.message;
   }
 });
 
 // Google Authentication
-googleAuthBtn.addEventListener("click", async () => {
+document.getElementById("google-auth").addEventListener("click", async () => {
   try {
-    await signInWithPopup(auth, provider);
-    alert("✅ Google Sign-In successful!");
+    const result = await signInWithPopup(auth, provider);
+    handleLogin(result.user);
   } catch (error) {
-    errorMessage.textContent = "❌ Google Sign-In Error: " + error.message;
+    document.getElementById("error-message").textContent = "❌ Google Sign-In Error: " + error.message;
   }
 });
