@@ -12,10 +12,26 @@ var firebaseConfig = {
   firebase.initializeApp(firebaseConfig);
   
   // Get elements
+  const loginPage = document.getElementById("loginPage");
+  const signupPage = document.getElementById("signupPage");
   const loginForm = document.getElementById("loginForm");
+  const signupForm = document.getElementById("signupForm");
   const loginStatus = document.getElementById("loginStatus");
+  const signupStatus = document.getElementById("signupStatus");
   
-  // Handle login
+  // Switch to Sign-Up Page
+  document.getElementById("goToSignup").addEventListener("click", () => {
+    loginPage.style.display = "none";
+    signupPage.style.display = "block";
+  });
+  
+  // Switch to Login Page
+  document.getElementById("goToLogin").addEventListener("click", () => {
+    signupPage.style.display = "none";
+    loginPage.style.display = "block";
+  });
+  
+  // Handle Login
   loginForm.addEventListener("submit", (e) => {
     e.preventDefault();
   
@@ -29,27 +45,31 @@ var firebaseConfig = {
         loginStatus.textContent = "Logged in successfully!";
         loginStatus.style.color = "green";
         console.log("User:", userCredential.user);
-      })    
+      })
       .catch((error) => {
         loginStatus.textContent = `Error: ${error.message}`;
         loginStatus.style.color = "red";
       });
   });
   
-  // Handle signup link
-  document.getElementById("signupLink").addEventListener("click", () => {
-    const email = prompt("Enter your email:");
-    const password = prompt("Enter your password:");
+  // Handle Sign-Up
+  signupForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+  
+    const email = document.getElementById("signupEmail").value;
+    const password = document.getElementById("signupPassword").value;
   
     firebase
       .auth()
       .createUserWithEmailAndPassword(email, password)
       .then((userCredential) => {
-        alert("Account created successfully!");
+        signupStatus.textContent = "Account created successfully!";
+        signupStatus.style.color = "green";
         console.log("User:", userCredential.user);
       })
       .catch((error) => {
-        alert(`Error: ${error.message}`);
+        signupStatus.textContent = `Error: ${error.message}`;
+        signupStatus.style.color = "red";
       });
   });
   
