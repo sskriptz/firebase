@@ -90,34 +90,60 @@
         <button id="logout-btn">Log Out</button>
     </div>
 
-    <script>
-        // Load user data from localStorage
-        const userData = JSON.parse(localStorage.getItem("user"));
-        if (userData) {
-            document.getElementById("profile-pic").src = userData.profilePic;
-            document.getElementById("welcome-message").textContent = `Hello, ${userData.name}`;
-        } else {
-            window.location.href = "index.html"; // Redirect if not logged in
-        }
+    <script type="module">
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
 
-        // Unique storage key for user
-        const userKey = `clicker-score-${userData.email}`;
-        let score = parseInt(localStorage.getItem(userKey)) || 0;
-        document.getElementById("score").textContent = score;
+  const firebaseConfig = {
+    apiKey: "AIzaSyB_1k5m_Xvz_JPlZ_9ZOR52UJUQWZKxfxo",
+    authDomain: "login-1ca6e.firebaseapp.com",
+    projectId: "login-1ca6e",
+    storageBucket: "login-1ca6e.firebasestorage.app",
+    messagingSenderId: "230736267753",
+    appId: "1:230736267753:web:ddd5e59c36a6e360136378"
+  };
 
-        // Clicker game logic
-        document.getElementById("click-button").addEventListener("click", () => {
-            score++;
-            document.getElementById("score").textContent = score;
-            localStorage.setItem(userKey, score); // Save progress
-        });
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-        // Logout function
-        document.getElementById("logout-btn").addEventListener("click", () => {
-            localStorage.removeItem("user"); // Clear user session
-            window.location.href = "index.html"; // Redirect to login
-        });
-    </script>
+  let userData;
+  
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      userData = user;
+      const userRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userRef);
+
+      if (userDoc.exists()) {
+        document.getElementById("profile-pic").src = userDoc.data().profilePic;
+        document.getElementById("welcome-message").textContent = `Hello, ${userDoc.data().name}`;
+        document.getElementById("score").textContent = userDoc.data().score || 0;
+      }
+    } else {
+      window.location.href = "index.html"; // Redirect if not logged in
+    }
+  });
+
+  document.getElementById("click-button").addEventListener("click", async () => {
+    if (!userData) return;
+    
+    const userRef = doc(db, "users", userData.uid);
+    const userDoc = await getDoc(userRef);
+    let newScore = (userDoc.exists() ? userDoc.data().score : 0) + 1;
+
+    await setDoc(userRef, { score: newScore }, { merge: true });
+    document.getElementById("score").textContent = newScore;
+  });
+
+  document.getElementById("logout-btn").addEventListener("click", async () => {
+    await signOut(auth);
+    localStorage.removeItem("user");
+    window.location.href = "index.html"; 
+  });
+</script>
+
 
 </body>
 </html>
