@@ -199,17 +199,13 @@
         // Sign out
         signOutBtn.onclick = () => {
             auth.signOut().then(() => {
-                // Reset the score to 0 after sign-out
-                userScore = 0;
-                scoreDisplay.textContent = userScore;
-
                 // Reset UI
                 userInfo.innerHTML = "";
                 signInBtn.style.display = "block";
                 signOutBtn.style.display = "none";
                 clickerGame.style.display = "none";
                 leaderboardBtn.style.display = "none";
-
+                
                 // Clear the userId to prevent issues on the next sign-in
                 userId = null;
             });
