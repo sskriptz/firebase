@@ -74,6 +74,21 @@
             background: #c1351d;
         }
 
+        /* Profile Info */
+        .profile {
+            display: none;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .profile img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+            border: 2px solid #ddd;
+        }
+
         /* Status Message */
         p {
             margin-top: 15px;
@@ -88,12 +103,18 @@
         
         <!-- Google Sign-In Button -->
         <button id="signInBtn" class="google-btn" onclick="signInWithGoogle()">
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJg75LWB1zIJt1VTZO7O68yKciaDSkk3KMdw&s" alt="Google Logo">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" alt="Google Logo">
             Sign in with Google
         </button>
 
         <!-- Sign Out Button -->
         <button id="signOutBtn" class="sign-out-btn" onclick="signOut()">Sign out</button>
+
+        <!-- User Profile -->
+        <div class="profile" id="profile">
+            <img id="userPic" src="" alt="User Profile Picture">
+            <p id="userName"></p>
+        </div>
 
         <p id="status">Checking login status...</p>
     </div>
@@ -123,7 +144,6 @@
             signInWithPopup(auth, provider)
                 .then((result) => {
                     const user = result.user;
-                    document.getElementById("status").innerText = `✅ Welcome, ${user.displayName}!`;
                     updateUI(user);
                 })
                 .catch((error) => {
@@ -134,7 +154,6 @@
         // Sign out function
         window.signOut = function () {
             signOut(auth).then(() => {
-                document.getElementById("status").innerText = "❌ You have signed out.";
                 updateUI(null);
             }).catch((error) => {
                 document.getElementById("status").innerText = `❌ Error: ${error.message}`;
@@ -148,14 +167,35 @@
 
         // Function to update UI
         function updateUI(user) {
+            const signInBtn = document.getElementById("signInBtn");
+            const signOutBtn = document.getElementById("signOutBtn");
+            const profileDiv = document.getElementById("profile");
+            const userPic = document.getElementById("userPic");
+            const userName = document.getElementById("userName");
+            const status = document.getElementById("status");
+
             if (user) {
-                document.getElementById("status").innerText = `✅ Welcome back, ${user.displayName}!`;
-                document.getElementById("signInBtn").style.display = "none";
-                document.getElementById("signOutBtn").style.display = "block";
+                // Show user profile
+                userPic.src = user.photoURL;
+                userName.innerText = `Welcome, ${user.displayName}!`;
+                profileDiv.style.display = "block";
+
+                // Update status
+                status.innerText = "✅ Signed in";
+
+                // Hide sign-in button, show sign-out button
+                signInBtn.style.display = "none";
+                signOutBtn.style.display = "block";
             } else {
-                document.getElementById("status").innerText = "❌ No user signed in.";
-                document.getElementById("signInBtn").style.display = "block";
-                document.getElementById("signOutBtn").style.display = "none";
+                // Hide user profile
+                profileDiv.style.display = "none";
+
+                // Update status
+                status.innerText = "❌ No user signed in.";
+
+                // Show sign-in button, hide sign-out button
+                signInBtn.style.display = "block";
+                signOutBtn.style.display = "none";
             }
         }
     </script>
