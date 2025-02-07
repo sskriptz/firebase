@@ -5,79 +5,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clicker Game</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
-
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            margin: 0;
-            padding: 0;
             background-color: #f4f4f4;
-        }
-        .container {
-            margin-top: 50px;
             padding: 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            display: inline-block;
         }
-        .google-btn {
-            display: flex;
-            align-items: center;
-            background: white;
-            border: 1px solid #ddd;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-bottom: 20px;
+        #clicker-game {
+            margin-top: 20px;
         }
-        .google-btn img {
-            width: 20px;
-            margin-right: 10px;
-        }
-        .hidden {
-            display: none;
-        }
-        #clicker-btn {
-            padding: 10px 20px;
+        #click-button {
+            padding: 15px;
             font-size: 18px;
-            cursor: pointer;
-            background-color: #28a745;
+            background-color: #4285F4;
             color: white;
             border: none;
             border-radius: 5px;
+            cursor: pointer;
+        }
+        #leaderboard-btn {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #34A853;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #sign-in-btn {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 10px 20px;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            border-radius: 5px;
             margin-top: 20px;
         }
-        #profile {
-            margin-top: 20px;
+        #sign-in-btn img {
+            width: 20px;
+            margin-right: 10px;
         }
-        #profile img {
-            width: 50px;
-            border-radius: 50%;
+        #sign-out-btn {
+            display: none;
+            background-color: #EA4335;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div id="login-section">
-            <button class="google-btn" onclick="signIn()">
-                <img src="https://www.cdnlogo.com/logos/g/35/google-icon.svg" alt="Google Logo">
-                Sign in with Google
-            </button>
-        </div>
+    <h1>Clicker Game</h1>
+    
+    <button id="sign-in-btn">
+        <img src="https://cdn4.iconfinder.com/data/icons/logos-brands-7/512/google_logo-google_icongoogle-512.png" alt="Google Logo">
+        Sign in with Google
+    </button>
+    
+    <button id="sign-out-btn">Sign Out</button>
 
-        <div id="game-section" class="hidden">
-            <h2>Welcome, <span id="username"></span>!</h2>
-            <div id="profile"><img id="profile-pic" src="" alt="Profile Picture"></div>
-            <h3>Score: <span id="score">0</span></h3>
-            <button id="clicker-btn" onclick="increaseScore()">Click Me!</button>
-            <br><br>
-            <button onclick="signOut()">Sign Out</button>
-        </div>
+    <div id="user-info"></div>
+
+    <div id="clicker-game" style="display: none;">
+        <h2>Clicks: <span id="score">0</span></h2>
+        <button id="click-button">Click Me!</button>
     </div>
+
+    <button id="leaderboard-btn" onclick="window.location.href='leaderboard.html'">View Leaderboard</button>
 
     <script>
         // Firebase configuration
@@ -91,67 +93,91 @@
         };
 
         // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
+        firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        let currentUser = null;
+        const signInBtn = document.getElementById("sign-in-btn");
+        const signOutBtn = document.getElementById("sign-out-btn");
+        const userInfo = document.getElementById("user-info");
+        const clickerGame = document.getElementById("clicker-game");
+        const clickButton = document.getElementById("click-button");
+        const scoreDisplay = document.getElementById("score");
+        const leaderboardBtn = document.getElementById("leaderboard-btn");
+
         let userScore = 0;
+        let userId = null;
 
         // Sign in with Google
-        function signIn() {
+        signInBtn.onclick = () => {
             const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider)
-                .then(result => {
-                    currentUser = result.user;
-                    loadUserData(currentUser);
-                })
-                .catch(error => console.error("Sign-in error:", error));
-        }
+            auth.signInWithPopup(provider).then(result => {
+                const user = result.user;
+                userId = user.uid;
+                saveUserToFirestore(user);
+                updateUI(user);
+            }).catch(error => console.error(error));
+        };
 
         // Sign out
-        function signOut() {
+        signOutBtn.onclick = () => {
             auth.signOut().then(() => {
-                currentUser = null;
-                document.getElementById("login-section").classList.remove("hidden");
-                document.getElementById("game-section").classList.add("hidden");
+                userInfo.innerHTML = "";
+                signInBtn.style.display = "block";
+                signOutBtn.style.display = "none";
+                clickerGame.style.display = "none";
+                leaderboardBtn.style.display = "none";
             });
+        };
+
+        // Save user to Firestore
+        function saveUserToFirestore(user) {
+            db.collection("users").doc(user.uid).set({
+                name: user.displayName,
+                photoURL: user.photoURL,
+                score: userScore
+            }, { merge: true });
         }
 
-        // Load user data from Firestore
-        async function loadUserData(user) {
-            if (!user) return;
-            document.getElementById("username").innerText = user.displayName;
-            document.getElementById("profile-pic").src = user.photoURL;
-
-            const userRef = db.collection("users").doc(user.uid);
-            const userSnap = await userRef.get();
-
-            if (userSnap.exists) {
-                userScore = userSnap.data().score || 0;
-            } else {
-                await userRef.set({ score: 0 });
-                userScore = 0;
+        // Load user data
+        function loadUserScore() {
+            if (userId) {
+                db.collection("users").doc(userId).get().then(doc => {
+                    if (doc.exists) {
+                        userScore = doc.data().score || 0;
+                        scoreDisplay.textContent = userScore;
+                    }
+                });
             }
-
-            document.getElementById("score").innerText = userScore;
-            document.getElementById("login-section").classList.add("hidden");
-            document.getElementById("game-section").classList.remove("hidden");
         }
 
-        // Increase score and save to Firestore
-        async function increaseScore() {
-            if (!currentUser) return;
+        // Click event to increase score
+        clickButton.onclick = () => {
             userScore++;
-            document.getElementById("score").innerText = userScore;
-            await db.collection("users").doc(currentUser.uid).set({ score: userScore }, { merge: true });
+            scoreDisplay.textContent = userScore;
+            if (userId) {
+                db.collection("users").doc(userId).update({ score: userScore });
+            }
+        };
+
+        // Update UI when user is logged in
+        function updateUI(user) {
+            if (user) {
+                userId = user.uid;
+                userInfo.innerHTML = `<p>Welcome, ${user.displayName}</p>
+                                      <img src="${user.photoURL}" width="50" style="border-radius:50%">`;
+                signInBtn.style.display = "none";
+                signOutBtn.style.display = "block";
+                clickerGame.style.display = "block";
+                leaderboardBtn.style.display = "block";
+                loadUserScore();
+            }
         }
 
-        // Auto-login if user is already signed in
+        // Check auth state on page load
         auth.onAuthStateChanged(user => {
             if (user) {
-                currentUser = user;
-                loadUserData(user);
+                updateUI(user);
             }
         });
     </script>
