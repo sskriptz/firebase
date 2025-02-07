@@ -1,36 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign In / Sign Up</title>
-  <link rel="stylesheet" href="styles.css">
-  <script type="module" src="app.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Sign-In with Firebase</title>
 </head>
 <body>
-  <div class="auth-container">
-    <h1 id="form-title">Sign In</h1>
+    <h2>Sign in with Google</h2>
+    <button onclick="signInWithGoogle()">Sign in</button>
+    <p id="status"></p>
 
-    <!-- Google Sign-In Button -->
-    <button class="google-btn" id="google-auth">
-      <img src="https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/dark/google-color.png" alt="Google Logo">
-      Continue with Google
-    </button>
+    <script type="module">
+        // Import Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
-    <!-- Separator -->
-    <div class="separator"><span>OR</span></div>
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAwUAqTV07AahyfD55owmyAcxDG3TP_KnI",
+            authDomain: "lofi-168cb.firebaseapp.com",
+            projectId: "lofi-168cb",
+            storageBucket: "lofi-168cb.appspot.com", // Fixed URL
+            messagingSenderId: "331670095312",
+            appId: "1:331670095312:web:7538041673a10b1b4aa5d5"
+        };
 
-    <!-- Email/Password Form -->
-    <form id="auth-form">
-      <input type="email" id="email" placeholder="Email" required>
-      <input type="password" id="password" placeholder="Password" required>
-      <button type="submit" class="auth-btn">Sign In</button>
-    </form>
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
 
-    <!-- Toggle Sign Up / Sign In -->
-    <p id="toggle-text">Don't have an account? <a href="#" id="toggle-auth">Sign Up</a></p>
-    
-    <p id="error-message"></p>
-  </div>
+        // Function to handle Google Sign-In
+        window.signInWithGoogle = function () {
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    const user = result.user;
+                    document.getElementById("status").innerText = `✅ Welcome, ${user.displayName}!`;
+                })
+                .catch((error) => {
+                    document.getElementById("status").innerText = `❌ Error: ${error.message}`;
+                });
+        };
+    </script>
 </body>
 </html>
