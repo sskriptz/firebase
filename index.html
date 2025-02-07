@@ -8,154 +8,153 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <style>
-    body {
-        font-family: 'Arial', sans-serif;
-        text-align: center;
-        background-color: #f0f4f8;
-        margin: 0;
-        padding: 0;
-    }
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 0;
+        }
 
-    h1 {
-        color: #333;
-        font-size: 2em;
-        margin-top: 40px;
-        font-weight: 600;
-    }
+        h1 {
+            color: #333;
+            font-size: 2em;
+            margin-top: 40px;
+            font-weight: 600;
+        }
 
-    #sign-in-btn {
-        padding: 12px 24px;
-        font-size: 16px;
-        background: white;
-        border: 1px solid #ddd;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        border-radius: 5px;
-        margin-top: 50px;
-        transition: background-color 0.3s, box-shadow 0.3s;
-        margin-left: auto;
-        margin-right: auto;
-    }
+        #sign-in-btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            background: white;
+            border: 1px solid #ddd;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 50px;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            margin-left: auto;
+            margin-right: auto;
+        }
 
-    #sign-in-btn img {
-        width: 20px;
-        margin-right: 10px;
-    }
+        #sign-in-btn img {
+            width: 20px;
+            margin-right: 10px;
+        }
 
-    #sign-in-btn:hover {
-        background-color: #f4f4f4;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    }
+        #sign-in-btn:hover {
+            background-color: #f4f4f4;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
 
-    #sign-out-btn {
-        display: none;
-        padding: 12px 24px;
-        background-color: #EA4335;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        margin-top: 20px;
-        cursor: pointer;
-        transition: background-color 0.3s, box-shadow 0.3s;
-    }
+        #sign-out-btn {
+            display: none;
+            padding: 12px 24px;
+            background-color: #EA4335;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
 
-    #sign-out-btn:hover {
-        background-color: #d93025;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    }
+        #sign-out-btn:hover {
+            background-color: #d93025;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
 
-    #clicker-game {
-        margin-top: 40px;
-        padding: 30px;
-        background-color: #ffffff;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        border-radius: 12px;
-        width: 80%;
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
-        opacity: 0;
-        transform: scale(0.8);
-        animation: fadeInUp 0.5s ease-out forwards;
-    }
-
-    #clicker-game h2 {
-        color: #555;
-        font-size: 28px;
-        margin-bottom: 20px;
-        font-weight: 500;
-    }
-
-    #score {
-        font-size: 30px;
-        font-weight: bold;
-    }
-
-    #click-button {
-        padding: 20px 40px;
-        font-size: 24px;
-        background-color: #34A853;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transition: background-color 0.3s, transform 0.3s ease-out;
-        margin-top: 20px;
-    }
-
-    #click-button:hover {
-        background-color: #28a745;
-        transform: scale(1.05);
-    }
-
-    #leaderboard-btn {
-        display: none;
-        padding: 12px 24px;
-        background-color: #34A853;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        margin-top: 30px;
-        transition: background-color 0.3s;
-    }
-
-    #leaderboard-btn:hover {
-        background-color: #28a745;
-    }
-
-    #user-info {
-        margin-top: 20px;
-        font-size: 18px;
-        color: #333;
-    }
-
-    #user-info img {
-        border-radius: 50%;
-        margin-left: 10px;
-    }
-
-    @keyframes fadeInUp {
-        0% {
+        #clicker-game {
+            margin-top: 40px;
+            padding: 30px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            width: 80%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
             opacity: 0;
             transform: scale(0.8);
+            animation: fadeInUp 0.5s ease-out forwards;
         }
-        100% {
-            opacity: 1;
-            transform: scale(1);
-        }
-    }
-</style>
 
+        #clicker-game h2 {
+            color: #555;
+            font-size: 28px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        #score {
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        #click-button {
+            padding: 20px 40px;
+            font-size: 24px;
+            background-color: #34A853;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, transform 0.3s ease-out;
+            margin-top: 20px;
+        }
+
+        #click-button:hover {
+            background-color: #28a745;
+            transform: scale(1.05);
+        }
+
+        #leaderboard-btn {
+            display: none;
+            padding: 12px 24px;
+            background-color: #34A853;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: background-color 0.3s;
+        }
+
+        #leaderboard-btn:hover {
+            background-color: #28a745;
+        }
+
+        #user-info {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        #user-info img {
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
 </head>
 <body>
     <h1>Clicker Game</h1>
     
     <button id="sign-in-btn">
-        <img src="https://cdn4.iconfinder.com/data/icons/logos-brands-7/512/google_logo-google_icongoogle-512.png" alt="Google Logo">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/2048px-Google_%22G%22_logo.svg.png" alt="Google Logo">
         Sign in with Google
     </button>
     
@@ -197,38 +196,26 @@
         let userScore = 0;
         let userId = null;
 
-        // Sign in with Google
-        signInBtn.onclick = () => {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).then(result => {
-                const user = result.user;
-                userId = user.uid;
-                saveUserToFirestore(user);
-                updateUI(user);
-            }).catch(error => console.error(error));
-        };
-
         // Sign out
         signOutBtn.onclick = () => {
             auth.signOut().then(() => {
+                // Clear previous user score when signing out
+                userScore = 0;
+                scoreDisplay.textContent = userScore;
+
+                // Reset UI for the new user
                 userInfo.innerHTML = "";
                 signInBtn.style.display = "block";
                 signOutBtn.style.display = "none";
                 clickerGame.style.display = "none";
                 leaderboardBtn.style.display = "none";
+
+                // Reset the userId to avoid conflicts with the previous user
+                userId = null;
             });
         };
 
-        // Save user to Firestore
-        function saveUserToFirestore(user) {
-            db.collection("users").doc(user.uid).set({
-                name: user.displayName,
-                photoURL: user.photoURL,
-                score: userScore
-            }, { merge: true });
-        }
-
-        // Load user data
+        // Load user data for the new user after sign-in
         function loadUserScore() {
             if (userId) {
                 db.collection("users").doc(userId).get().then(doc => {
@@ -238,6 +225,26 @@
                     }
                 });
             }
+        }
+
+        // Sign in with Google
+        signInBtn.onclick = () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).then(result => {
+                const user = result.user;
+                userId = user.uid;
+                saveUserToFirestore(user);  // Save user data to Firestore
+                updateUI(user);  // Update UI after successful sign-in
+            }).catch(error => console.error(error));
+        };
+
+        // Save user to Firestore
+        function saveUserToFirestore(user) {
+            db.collection("users").doc(user.uid).set({
+                name: user.displayName,
+                photoURL: user.photoURL,
+                score: userScore
+            }, { merge: true });
         }
 
         // Click event to increase score
@@ -259,7 +266,7 @@
                 signOutBtn.style.display = "block";
                 clickerGame.style.display = "block";
                 leaderboardBtn.style.display = "block";
-                loadUserScore();
+                loadUserScore();  // Load score for the new user
             }
         }
 
