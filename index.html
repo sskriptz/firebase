@@ -8,59 +8,110 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f4f4f4;
-            padding: 20px;
-        }
-        #clicker-game {
-            margin-top: 20px;
-        }
-        #click-button {
-            padding: 15px;
-            font-size: 18px;
-            background-color: #4285F4;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        #leaderboard-btn {
-            display: none;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #34A853;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        #sign-in-btn {
-            background: white;
-            border: 1px solid #ddd;
-            padding: 10px 20px;
-            display: inline-flex;
-            align-items: center;
-            cursor: pointer;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
-        #sign-in-btn img {
-            width: 20px;
-            margin-right: 10px;
-        }
-        #sign-out-btn {
-            display: none;
-            background-color: #EA4335;
-            color: white;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            margin-top: 20px;
-            cursor: pointer;
-        }
-    </style>
+    body {
+        font-family: 'Arial', sans-serif;
+        text-align: center;
+        background-color: #f0f4f8;
+        margin: 0;
+        padding: 0;
+    }
+
+    h1 {
+        color: #333;
+        font-size: 2em;
+        margin-top: 20px;
+    }
+
+    #sign-in-btn, #sign-out-btn {
+        padding: 12px 24px;
+        font-size: 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background-color 0.3s;
+    }
+
+    #sign-in-btn {
+        background-color: #4285F4;
+        color: white;
+        border: none;
+    }
+
+    #sign-in-btn:hover {
+        background-color: #357ae8;
+    }
+
+    #sign-out-btn {
+        background-color: #EA4335;
+        color: white;
+        border: none;
+        display: none;
+    }
+
+    #sign-out-btn:hover {
+        background-color: #d93025;
+    }
+
+    #clicker-game {
+        margin-top: 40px;
+        padding: 30px;
+        background-color: #ffffff;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        display: none;
+    }
+
+    #clicker-game h2 {
+        color: #555;
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    #click-button {
+        padding: 20px 40px;
+        font-size: 24px;
+        background-color: #34A853;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s, transform 0.2s;
+    }
+
+    #click-button:hover {
+        background-color: #28a745;
+        transform: scale(1.05);
+    }
+
+    #leaderboard-btn {
+        display: none;
+        padding: 12px 24px;
+        background-color: #34A853;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 30px;
+        transition: background-color 0.3s;
+    }
+
+    #leaderboard-btn:hover {
+        background-color: #28a745;
+    }
+
+    #user-info {
+        margin-top: 20px;
+        font-size: 18px;
+        color: #333;
+    }
+
+    #user-info img {
+        border-radius: 50%;
+        margin-left: 10px;
+    }
+</style>
+
 </head>
 <body>
     <h1>Clicker Game</h1>
