@@ -199,23 +199,23 @@
         // Sign out
         signOutBtn.onclick = () => {
             auth.signOut().then(() => {
-                // Clear previous user score when signing out
+                // Reset the score to 0 after sign-out
                 userScore = 0;
                 scoreDisplay.textContent = userScore;
 
-                // Reset UI for the new user
+                // Reset UI
                 userInfo.innerHTML = "";
                 signInBtn.style.display = "block";
                 signOutBtn.style.display = "none";
                 clickerGame.style.display = "none";
                 leaderboardBtn.style.display = "none";
 
-                // Reset the userId to avoid conflicts with the previous user
+                // Clear the userId to prevent issues on the next sign-in
                 userId = null;
             });
         };
 
-        // Load user data for the new user after sign-in
+        // Load user data after sign-in
         function loadUserScore() {
             if (userId) {
                 db.collection("users").doc(userId).get().then(doc => {
@@ -256,7 +256,7 @@
             }
         };
 
-        // Update UI when user is logged in
+        // Update UI after sign-in
         function updateUI(user) {
             if (user) {
                 userId = user.uid;
