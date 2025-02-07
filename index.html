@@ -3,128 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Sign-In with Firebase</title>
+    <title>Clicker Game</title>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js"></script>
     <style>
-        /* General Styling */
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            background-color: #f5f5f5;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
             margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
         }
-
         .container {
+            margin-top: 50px;
+            padding: 20px;
             background: white;
-            padding: 30px;
             border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            width: 100%;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            display: inline-block;
         }
-
-        h2 {
-            margin-bottom: 20px;
-        }
-
-        /* Google Button */
         .google-btn {
             display: flex;
             align-items: center;
-            justify-content: center;
             background: white;
             border: 1px solid #ddd;
-            padding: 10px 15px;
+            padding: 10px 20px;
             border-radius: 5px;
-            font-size: 16px;
-            font-weight: bold;
             cursor: pointer;
-            width: 100%;
-            transition: 0.3s;
+            margin-bottom: 20px;
         }
-
         .google-btn img {
             width: 20px;
             margin-right: 10px;
         }
-
-        .google-btn:hover {
-            background: #f1f1f1;
+        .hidden {
+            display: none;
         }
-
-        /* Sign Out Button */
-        .sign-out-btn {
-            background: #db4437;
+        #clicker-btn {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #28a745;
             color: white;
             border: none;
-            padding: 10px;
             border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 10px;
-            display: none;
+            margin-top: 20px;
         }
-
-        .sign-out-btn:hover {
-            background: #c1351d;
+        #profile {
+            margin-top: 20px;
         }
-
-        /* Profile Info */
-        .profile {
-            display: none;
-            margin-top: 15px;
-            text-align: center;
-        }
-
-        .profile img {
-            width: 80px;
-            height: 80px;
+        #profile img {
+            width: 50px;
             border-radius: 50%;
-            margin-bottom: 10px;
-            border: 2px solid #ddd;
-        }
-
-        /* Status Message */
-        p {
-            margin-top: 15px;
-            font-size: 16px;
-            color: #333;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Google Sign-In</h2>
-        
-        <!-- Google Sign-In Button -->
-        <button id="signInBtn" class="google-btn" onclick="signInWithGoogle()">
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTntP7y9PTP3jWbEGeA1pgrBAV3JAVrVyah5g&s" alt="Google Logo">
-            Sign in with Google
-        </button>
-
-        <!-- Sign Out Button -->
-        <button id="signOutBtn" class="sign-out-btn" onclick="signOut()">Sign out</button>
-
-        <!-- User Profile -->
-        <div class="profile" id="profile">
-            <img id="userPic" src="" alt="User Profile Picture">
-            <p id="userName"></p>
+        <div id="login-section">
+            <button class="google-btn" onclick="signIn()">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" alt="Google Logo">
+                Sign in with Google
+            </button>
         </div>
 
-        <p id="status">Checking login status...</p>
+        <div id="game-section" class="hidden">
+            <h2>Welcome, <span id="username"></span>!</h2>
+            <div id="profile"><img id="profile-pic" src="" alt="Profile Picture"></div>
+            <h3>Score: <span id="score">0</span></h3>
+            <button id="clicker-btn" onclick="increaseScore()">Click Me!</button>
+            <br><br>
+            <button onclick="signOut()">Sign Out</button>
+        </div>
     </div>
 
-    <script type="module">
-        // Import Firebase SDK
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-
-        // Your Firebase configuration
+    <script>
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAwUAqTV07AahyfD55owmyAcxDG3TP_KnI",
             authDomain: "lofi-168cb.firebaseapp.com",
@@ -135,69 +90,69 @@
         };
 
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-        // Sign in function
-        window.signInWithGoogle = function () {
-            signInWithPopup(auth, provider)
-                .then((result) => {
-                    const user = result.user;
-                    updateUI(user);
+        let currentUser = null;
+        let userScore = 0;
+
+        // Sign in with Google
+        function signIn() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .then(result => {
+                    currentUser = result.user;
+                    loadUserData(currentUser);
                 })
-                .catch((error) => {
-                    document.getElementById("status").innerText = `❌ Error: ${error.message}`;
-                });
-        };
-
-        // Sign out function
-        window.signOut = function () {
-            signOut(auth).then(() => {
-                updateUI(null);
-            }).catch((error) => {
-                document.getElementById("status").innerText = `❌ Error: ${error.message}`;
-            });
-        };
-
-        // Check if user is already signed in & update UI
-        onAuthStateChanged(auth, (user) => {
-            updateUI(user);
-        });
-
-        // Function to update UI
-        function updateUI(user) {
-            const signInBtn = document.getElementById("signInBtn");
-            const signOutBtn = document.getElementById("signOutBtn");
-            const profileDiv = document.getElementById("profile");
-            const userPic = document.getElementById("userPic");
-            const userName = document.getElementById("userName");
-            const status = document.getElementById("status");
-
-            if (user) {
-                // Show user profile
-                userPic.src = user.photoURL;
-                userName.innerText = `Welcome, ${user.displayName}!`;
-                profileDiv.style.display = "block";
-
-                // Update status
-                status.innerText = "✅ Signed in";
-
-                // Hide sign-in button, show sign-out button
-                signInBtn.style.display = "none";
-                signOutBtn.style.display = "block";
-            } else {
-                // Hide user profile
-                profileDiv.style.display = "none";
-
-                // Update status
-                status.innerText = "❌ No user signed in.";
-
-                // Show sign-in button, hide sign-out button
-                signInBtn.style.display = "block";
-                signOutBtn.style.display = "none";
-            }
+                .catch(error => console.error("Sign-in error:", error));
         }
+
+        // Sign out
+        function signOut() {
+            auth.signOut().then(() => {
+                currentUser = null;
+                document.getElementById("login-section").classList.remove("hidden");
+                document.getElementById("game-section").classList.add("hidden");
+            });
+        }
+
+        // Load user data from Firestore
+        async function loadUserData(user) {
+            if (!user) return;
+            document.getElementById("username").innerText = user.displayName;
+            document.getElementById("profile-pic").src = user.photoURL;
+
+            const userRef = db.collection("users").doc(user.uid);
+            const userSnap = await userRef.get();
+
+            if (userSnap.exists) {
+                userScore = userSnap.data().score || 0;
+            } else {
+                await userRef.set({ score: 0 });
+                userScore = 0;
+            }
+
+            document.getElementById("score").innerText = userScore;
+            document.getElementById("login-section").classList.add("hidden");
+            document.getElementById("game-section").classList.remove("hidden");
+        }
+
+        // Increase score and save to Firestore
+        async function increaseScore() {
+            if (!currentUser) return;
+            userScore++;
+            document.getElementById("score").innerText = userScore;
+            await db.collection("users").doc(currentUser.uid).set({ score: userScore }, { merge: true });
+        }
+
+        // Auto-login if user is already signed in
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                loadUserData(user);
+            }
+        });
     </script>
 </body>
 </html>
