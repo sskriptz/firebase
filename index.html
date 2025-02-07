@@ -8,19 +8,20 @@
 <body>
     <h2>Sign in with Google</h2>
     <button onclick="signInWithGoogle()">Sign in</button>
-    <p id="status"></p>
+    <button onclick="signOut()">Sign out</button>
+    <p id="status">Checking login status...</p>
 
     <script type="module">
         // Import Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
         // Your Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAwUAqTV07AahyfD55owmyAcxDG3TP_KnI",
             authDomain: "lofi-168cb.firebaseapp.com",
             projectId: "lofi-168cb",
-            storageBucket: "lofi-168cb.appspot.com", // Fixed URL
+            storageBucket: "lofi-168cb.appspot.com",
             messagingSenderId: "331670095312",
             appId: "1:331670095312:web:7538041673a10b1b4aa5d5"
         };
@@ -41,6 +42,24 @@
                     document.getElementById("status").innerText = `❌ Error: ${error.message}`;
                 });
         };
+
+        // Function to sign out
+        window.signOut = function () {
+            signOut(auth).then(() => {
+                document.getElementById("status").innerText = "❌ You have signed out.";
+            }).catch((error) => {
+                document.getElementById("status").innerText = `❌ Error: ${error.message}`;
+            });
+        };
+
+        // Check if user is already signed in
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById("status").innerText = `✅ Welcome back, ${user.displayName}!`;
+            } else {
+                document.getElementById("status").innerText = "❌ No user signed in.";
+            }
+        });
     </script>
 </body>
 </html>
