@@ -4,12 +4,99 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Google Sign-In with Firebase</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        /* Google Button */
+        .google-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.3s;
+        }
+
+        .google-btn img {
+            width: 20px;
+            margin-right: 10px;
+        }
+
+        .google-btn:hover {
+            background: #f1f1f1;
+        }
+
+        /* Sign Out Button */
+        .sign-out-btn {
+            background: #db4437;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .sign-out-btn:hover {
+            background: #c1351d;
+        }
+
+        /* Status Message */
+        p {
+            margin-top: 15px;
+            font-size: 16px;
+            color: #333;
+        }
+    </style>
 </head>
 <body>
-    <h2>Sign in with Google</h2>
-    <button onclick="signInWithGoogle()">Sign in</button>
-    <button onclick="signOut()">Sign out</button>
-    <p id="status">Checking login status...</p>
+    <div class="container">
+        <h2>Google Sign-In</h2>
+        
+        <!-- Google Sign-In Button -->
+        <button id="signInBtn" class="google-btn" onclick="signInWithGoogle()">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" alt="Google Logo">
+            Sign in with Google
+        </button>
+
+        <!-- Sign Out Button -->
+        <button id="signOutBtn" class="sign-out-btn" onclick="signOut()">Sign out</button>
+
+        <p id="status">Checking login status...</p>
+    </div>
 
     <script type="module">
         // Import Firebase SDK
@@ -31,35 +118,46 @@
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
-        // Function to handle Google Sign-In
+        // Sign in function
         window.signInWithGoogle = function () {
             signInWithPopup(auth, provider)
                 .then((result) => {
                     const user = result.user;
                     document.getElementById("status").innerText = `✅ Welcome, ${user.displayName}!`;
+                    updateUI(user);
                 })
                 .catch((error) => {
                     document.getElementById("status").innerText = `❌ Error: ${error.message}`;
                 });
         };
 
-        // Function to sign out
+        // Sign out function
         window.signOut = function () {
             signOut(auth).then(() => {
                 document.getElementById("status").innerText = "❌ You have signed out.";
+                updateUI(null);
             }).catch((error) => {
                 document.getElementById("status").innerText = `❌ Error: ${error.message}`;
             });
         };
 
-        // Check if user is already signed in
+        // Check if user is already signed in & update UI
         onAuthStateChanged(auth, (user) => {
+            updateUI(user);
+        });
+
+        // Function to update UI
+        function updateUI(user) {
             if (user) {
                 document.getElementById("status").innerText = `✅ Welcome back, ${user.displayName}!`;
+                document.getElementById("signInBtn").style.display = "none";
+                document.getElementById("signOutBtn").style.display = "block";
             } else {
                 document.getElementById("status").innerText = "❌ No user signed in.";
+                document.getElementById("signInBtn").style.display = "block";
+                document.getElementById("signOutBtn").style.display = "none";
             }
-        });
+        }
     </script>
 </body>
 </html>
