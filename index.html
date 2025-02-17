@@ -193,7 +193,11 @@
 
         <div id="mainSection" class="main-section clearfix">
             <button onclick="signOut()" style="float: right;">Sign Out</button>
-            <h2>Welcome, <span id="userUsername"></span></h2>
+
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                <img id="userProfilePic" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" alt="Profile Picture">
+                <h2>Welcome, <span id="userUsername"></span></h2>
+            </div>
             
             <div class="search-section">
                 <h3 class="section-title">Search Users</h3>
@@ -246,8 +250,25 @@
 
         // Auth state observer
         auth.onAuthStateChanged(async (user) => {
+            // Clear chat container and reset chat state
+            document.getElementById('chatContainer').style.display = 'none';
+            currentChatUser = null;
+            if (messageListener) {
+                messageListener();
+                messageListener = null;
+            }
+
             if (user) {
                 const userDoc = await db.collection('users').doc(user.uid).get();
+
+                const profilePicElement = document.getElementById('userProfilePic');
+                if (user.photoURL) {
+                    profilePicElement.src = user.photoURL;
+                } else {
+                    // Default profile picture if none exists
+                    profilePicElement.src = 'https://www.gravatar.com/avatar/?d=mp';
+                }
+
                 if (!userDoc.exists || !userDoc.data().username) {
                     document.getElementById('authSection').style.display = 'none';
                     document.getElementById('usernameSection').style.display = 'block';
@@ -293,7 +314,8 @@
                     email: user.email,
                     username: username,
                     friends: [],
-                    friendRequests: []
+                    friendRequests: [],
+                    profilePicture: user.photoURL || null  // Add this line
                 });
 
                 document.getElementById('usernameSection').style.display = 'none';
@@ -337,8 +359,15 @@
         }
 
         function signOut() {
-            auth.signOut();
-        }
+    // Clear chat container and reset chat state
+    document.getElementById('chatContainer').style.display = 'none';
+    currentChatUser = null;
+    if (messageListener) {
+        messageListener();
+        messageListener = null;
+    }
+    auth.signOut();
+}
 
         function setupSearchListener() {
             const searchInput = document.getElementById('searchInput');
@@ -359,6 +388,10 @@
 
         async function searchUsers(searchTerm) {
             const currentUser = auth.currentUser;
+            const currentUserDoc = await db.collection('users').doc(currentUser.uid).get();
+            const currentUserData = currentUserDoc.data();
+            const currentUserFriends = currentUserData.friends || [];
+            
             const usersRef = db.collection('users');
             const snapshot = await usersRef.where('username', '>=', searchTerm)
                                         .where('username', '<=', searchTerm + '\uf8ff')
@@ -369,11 +402,20 @@
             snapshot.forEach(doc => {
                 const userData = doc.data();
                 if (doc.id !== currentUser.uid) {
+                    const isAlreadyFriend = currentUserFriends.some(friend => friend.userId === doc.id);
                     const userCard = document.createElement('div');
                     userCard.className = 'user-card';
                     userCard.innerHTML = `
-                        <span>${userData.username}</span>
-                        <button onclick="sendFriendRequest('${doc.id}')">Send Friend Request</button>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <img src="${userData.profilePicture || 'https://www.gravatar.com/avatar/?d=mp'}" 
+                                alt="Profile" 
+                                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                            <span>${userData.username}</span>
+                        </div>
+                        ${isAlreadyFriend ? 
+                            '<button disabled>Already Friends</button>' : 
+                            `<button onclick="sendFriendRequest('${doc.id}')">Send Friend Request</button>`
+                        }
                     `;
                     searchResults.appendChild(userCard);
                 }
@@ -384,14 +426,37 @@
             const currentUser = auth.currentUser;
             try {
                 const currentUserDoc = await db.collection('users').doc(currentUser.uid).get();
+                const currentUserData = currentUserDoc.data();
+                const targetUserDoc = await db.collection('users').doc(targetUserId).get();
+                const targetUserData = targetUserDoc.data();
+
+                // Check if already friends
+                const isAlreadyFriend = currentUserData.friends.some(friend => friend.userId === targetUserId);
+                if (isAlreadyFriend) {
+                    alert('You are already friends with this user!');
+                    return;
+                }
+
+                // Check if friend request already sent
+                const requestAlreadySent = targetUserData.friendRequests.some(
+                    request => request.userId === currentUser.uid && request.status === 'pending'
+                );
+                if (requestAlreadySent) {
+                    alert('Friend request already sent!');
+                    return;
+                }
+
                 const targetUserRef = db.collection('users').doc(targetUserId);
                 await targetUserRef.update({
                     friendRequests: firebase.firestore.FieldValue.arrayUnion({
                         userId: currentUser.uid,
-                        username: currentUserDoc.data().username,
+                        username: currentUserData.username,
                         status: 'pending'
                     })
                 });
+
+                document.getElementById('searchResults').innerHTML = '';
+                document.getElementById('searchInput').value = '';
                 alert('Friend request sent!');
             } catch (error) {
                 alert('Error sending friend request: ' + error.message);
@@ -406,18 +471,29 @@
             notifications.innerHTML = '';
 
             if (userData.friendRequests && userData.friendRequests.length > 0) {
-                userData.friendRequests.forEach(request => {
+                for (const request of userData.friendRequests) {
                     if (request.status === 'pending') {
+                        // Fetch requester's current data to get their up-to-date profile picture
+                        const requesterDoc = await db.collection('users').doc(request.userId).get();
+                        const requesterData = requesterDoc.data();
+                        
                         const notification = document.createElement('div');
                         notification.className = 'notification';
                         notification.innerHTML = `
-                            <p>Friend request from ${request.username}</p>
-                            <button onclick="acceptFriendRequest('${request.userId}')">Accept</button>
-                            <button onclick="rejectFriendRequest('${request.userId}')">Reject</button>
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                <img src="${requesterData.profilePicture || 'https://www.gravatar.com/avatar/?d=mp'}" 
+                                    alt="Profile" 
+                                    style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                <p>Friend request from ${request.username}</p>
+                            </div>
+                            <div>
+                                <button onclick="acceptFriendRequest('${request.userId}')">Accept</button>
+                                <button onclick="rejectFriendRequest('${request.userId}')">Reject</button>
+                            </div>
                         `;
                         notifications.appendChild(notification);
                     }
-                });
+                }
             }
         }
 
@@ -488,16 +564,27 @@
             friendsList.innerHTML = '';
 
             if (userData.friends && userData.friends.length > 0) {
-                userData.friends.forEach(friend => {
+                for (const friend of userData.friends) {
+                    // Fetch friend's current data to get their up-to-date profile picture
+                    const friendDoc = await db.collection('users').doc(friend.userId).get();
+                    const friendData = friendDoc.data();
+                    
                     const friendItem = document.createElement('div');
                     friendItem.className = 'friend-item';
                     friendItem.innerHTML = `
-                        <span>${friend.username}</span>
-                        <button onclick="removeFriend('${friend.userId}')">Remove</button>
-                        <button onclick="openChat('${friend.userId}', '${friend.username}')">Chat</button>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <img src="${friendData.profilePicture || 'https://www.gravatar.com/avatar/?d=mp'}" 
+                                alt="Profile" 
+                                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                            <span>${friend.username}</span>
+                        </div>
+                        <div>
+                            <button onclick="removeFriend('${friend.userId}')">Remove</button>
+                            <button onclick="openChat('${friend.userId}', '${friend.username}')">Chat</button>
+                        </div>
                     `;
                     friendsList.appendChild(friendItem);
-                });
+                }
             } else {
                 friendsList.innerHTML = '<p>No friends yet</p>';
             }
