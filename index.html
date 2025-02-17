@@ -1,282 +1,420 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clicker Game</title>
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            text-align: center;
-            background-color: #f0f4f8;
-            margin: 0;
-            padding: 0;
-        }
-
-        h1 {
-            color: #333;
-            font-size: 2em;
-            margin-top: 40px;
-            font-weight: 600;
-        }
-
-        #sign-in-btn {
-            padding: 12px 24px;
-            font-size: 16px;
-            background: white;
-            border: 1px solid #ddd;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            border-radius: 5px;
-            margin-top: 50px;
-            transition: background-color 0.3s, box-shadow 0.3s;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        #sign-in-btn img {
-            width: 20px;
-            margin-right: 10px;
-        }
-
-        #sign-in-btn:hover {
-            background-color: #f4f4f4;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        #sign-out-btn {
-            display: none;
-            padding: 12px 24px;
-            background-color: #EA4335;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            margin-top: 20px;
-            cursor: pointer;
-            transition: background-color 0.3s, box-shadow 0.3s;
-        }
-
-        #sign-out-btn:hover {
-            background-color: #d93025;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        #clicker-game {
-            margin-top: 40px;
-            padding: 30px;
-            background-color: #ffffff;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            border-radius: 12px;
-            width: 80%;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            opacity: 0;
-            transform: scale(0.8);
-            animation: fadeInUp 0.5s ease-out forwards;
-        }
-
-        #clicker-game h2 {
-            color: #555;
-            font-size: 28px;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-
-        #score {
-            font-size: 30px;
-            font-weight: bold;
-        }
-
-        #click-button {
-            padding: 20px 40px;
-            font-size: 24px;
-            background-color: #34A853;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: background-color 0.3s, transform 0.3s ease-out;
-            margin-top: 20px;
-        }
-
-        #click-button:hover {
-            background-color: #28a745;
-            transform: scale(1.05);
-        }
-
-        #leaderboard-btn {
-            display: none;
-            padding: 12px 24px;
-            background-color: #34A853;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 30px;
-            transition: background-color 0.3s;
-        }
-
-        #leaderboard-btn:hover {
-            background-color: #28a745;
-        }
-
-        #user-info {
-            margin-top: 20px;
-            font-size: 18px;
-            color: #333;
-        }
-
-        #user-info img {
-            border-radius: 50%;
-            margin-left: 10px;
-        }
-
-        @keyframes fadeInUp {
-            0% {
-                opacity: 0;
-                transform: scale(0.8);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clicker Game with Leaderboard & Friending System</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #222;
+      color: #fff;
+      padding: 20px;
+      margin-bottom: 240px;
+    }
+    #user-info img {
+      width: 50px;
+      border-radius: 50%;
+      vertical-align: middle;
+    }
+    #user-info p {
+      display: inline-block;
+      margin-left: 10px;
+      vertical-align: middle;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #sign-in-btn { background: #4285F4; color: white; }
+    #sign-out-btn { background: #FF4444; color: white; }
+    #clicker { background: #34A853; color: white; }
+    h2 { margin-top: 20px; }
+    /* Friend System styles */
+    #friend-system {
+      margin-top: 30px;
+      padding: 10px;
+      background: #333;
+      border-radius: 8px;
+      display: none; /* Initially hidden until signed in */
+    }
+    #friend-system input[type="text"] {
+      padding: 8px;
+      font-size: 16px;
+      width: 60%;
+      margin-right: 5px;
+      border-radius: 4px;
+      border: none;
+    }
+    #friend-system button {
+      padding: 8px 16px;
+      font-size: 16px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      background: #4285F4;
+      color: white;
+    }
+    #friend-search-result p {
+      margin: 10px 0;
+    }
+    #friend-requests {
+      margin-top: 10px;
+      padding: 10px;
+      background: #444;
+      border-radius: 5px;
+    }
+    #current-friends {
+      margin-top: 20px;
+      padding: 10px;
+      background: #444;
+      border-radius: 5px;
+    }
+    /* Leaderboard styles */
+    #leaderboard {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.85);
+      color: #fff;
+      padding: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      border-top: 2px solid #555;
+      display: none;
+    }
+  </style>
 </head>
 <body>
-    <h1>Clicker Game</h1>
-    
-    <button id="sign-in-btn">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/2048px-Google_%22G%22_logo.svg.png" alt="Google Logo">
-        Sign in with Google
-    </button>
-    
-    <button id="sign-out-btn">Sign Out</button>
+  <div id="user-info"></div>
+  <button id="sign-in-btn">Sign in with Google</button>
+  <button id="sign-out-btn" style="display:none;">Sign Out</button>
+  
+  <h2 id="score">Score: 0</h2>
+  <button id="clicker">Click Me!</button>
+  
+  <!-- Friend System Panel (Search and Requests) -->
+  <div id="friend-system">
+    <h3>Find Friends</h3>
+    <input type="text" id="friend-search-input" placeholder="Enter username to search">
+    <button id="friend-search-btn">Search User</button>
+    <div id="friend-search-result"></div>
+    <div id="friend-requests"></div>
+  </div>
+  
+  <!-- Current Friends Panel (this section will show current friends after successful requests) -->
+  <div id="current-friends">
+    <h3>Your Friends</h3>
+    <div id="friends-list"></div>
+  </div>
+  
+  <!-- Leaderboard attached to the bottom -->
+  <div id="leaderboard"></div>
+  
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyBLa2zdt4hxe348WHp-mfgIKwOlgghQS2w",
+        authDomain: "friend-84a46.firebaseapp.com",
+        projectId: "friend-84a46",
+        storageBucket: "friend-84a46.firebasestorage.app",
+        messagingSenderId: "1021505667527",
+        appId: "1:1021505667527:web:7cbb2f03c1bd9f3cd6d9e2"
+    };
 
-    <div id="user-info"></div>
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-    <div id="clicker-game" style="display: none;">
-        <h2>Clicks: <span id="score">0</span></h2>
-        <button id="click-button">Click Me!</button>
-    </div>
+    // UI Elements
+    const signInBtn = document.getElementById("sign-in-btn");
+    const signOutBtn = document.getElementById("sign-out-btn");
+    const userInfoDiv = document.getElementById("user-info");
+    const scoreDisplay = document.getElementById("score");
+    const clickerBtn = document.getElementById("clicker");
+    const leaderboardDiv = document.getElementById("leaderboard");
+    const friendSystemDiv = document.getElementById("friend-system");
+    const friendSearchInput = document.getElementById("friend-search-input");
+    const friendSearchBtn = document.getElementById("friend-search-btn");
+    const friendSearchResultDiv = document.getElementById("friend-search-result");
+    const friendRequestsDiv = document.getElementById("friend-requests");
+    const currentFriendsDiv = document.getElementById("current-friends");
+    const friendsListDiv = document.getElementById("friends-list");
 
-    <button id="leaderboard-btn" onclick="window.location.href='leaderboard.html'">View Leaderboard</button>
+    let score = 0;
+    let currentUser = null; // will hold the authenticated user
 
-    <script>
-        // Firebase configuration
-        // const firebaseConfig = {
-        //     apiKey: "AIzaSyAwUAqTV07AahyfD55owmyAcxDG3TP_KnI",
-        //     authDomain: "lofi-168cb.firebaseapp.com",
-        //     projectId: "lofi-168cb",
-        //     storageBucket: "lofi-168cb.appspot.com",
-        //     messagingSenderId: "331670095312",
-        //     appId: "1:331670095312:web:7538041673a10b1b4aa5d5"
-        // };
+    // Sign in with Google
+    signInBtn.addEventListener("click", () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(result => {
+          console.log("User signed in:", result.user);
+        })
+        .catch(error => console.error("Sign-in error:", error));
+    });
 
-        // // Initialize Firebase
-        // firebase.initializeApp(firebaseConfig);
-        // const auth = firebase.auth();
-        // const db = firebase.firestore();
+    // Sign out functionality
+    signOutBtn.addEventListener("click", () => {
+      auth.setPersistence(firebase.auth.Auth.Persistence.NONE)
+        .then(() => auth.signOut())
+        .then(() => {
+          // Clear UI on sign-out
+          userInfoDiv.innerHTML = "";
+          scoreDisplay.innerText = "Score: 0";
+          signInBtn.style.display = "inline-block";
+          signOutBtn.style.display = "none";
+          leaderboardDiv.style.display = "none";
+          friendSystemDiv.style.display = "none";
+          currentFriendsDiv.style.display = "none"; // Hide friends section
+        })
+        .catch(error => console.error("Sign-out error:", error));
+    });
 
-        // const signInBtn = document.getElementById("sign-in-btn");
-        // const signOutBtn = document.getElementById("sign-out-btn");
-        // const userInfo = document.getElementById("user-info");
-        // const clickerGame = document.getElementById("clicker-game");
-        // const clickButton = document.getElementById("click-button");
-        // const scoreDisplay = document.getElementById("score");
-        // const leaderboardBtn = document.getElementById("leaderboard-btn");
+    // Monitor authentication state
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        currentUser = user;
+        userInfoDiv.innerHTML = `
+          <img src="${user.photoURL}" alt="User Image">
+          <p>Hello, ${user.displayName}</p>
+        `;
+        signInBtn.style.display = "none";
+        signOutBtn.style.display = "inline-block";
+        leaderboardDiv.style.display = "block";
+        friendSystemDiv.style.display = "block"; // Make the friend system panel visible
+        currentFriendsDiv.style.display = "block"; // Show the current friends panel
 
-        // let userScore = 0;
-        // let userId = null;
+        // Check if the user has an existing score in Firestore, create if not
+        db.collection("users").doc(user.uid).get()
+          .then(doc => {
+            if (!doc.exists) {
+              // Create a new document with default score of 0 if it doesn't exist
+              db.collection("users").doc(user.uid).set({ score: 0, name: user.displayName, friends: [] }, { merge: true });
+            }
+            score = doc.exists ? doc.data().score || 0 : 0;
+            scoreDisplay.innerText = `Score: ${score}`;
+            loadLeaderboard(); // Load leaderboard after score retrieval
+            loadFriendRequests(); // Load friend requests
+            loadFriendsList(); // Load current friends list
+          })
+          .catch(error => console.error("Error fetching score:", error));
+      } else {
+        currentUser = null;
+        userInfoDiv.innerHTML = "";
+        scoreDisplay.innerText = "Score: 0";
+        signInBtn.style.display = "inline-block";
+        signOutBtn.style.display = "none";
+        leaderboardDiv.style.display = "none";
+        friendSystemDiv.style.display = "none"; // Hide friend system panel
+        currentFriendsDiv.style.display = "none"; // Hide friends section
+      }
+    });
 
-        // // Sign out
-        // signOutBtn.onclick = () => {
-        //     auth.signOut().then(() => {
-        //         // Reset UI
-        //         userInfo.innerHTML = "";
-        //         signInBtn.style.display = "block";
-        //         signOutBtn.style.display = "none";
-        //         clickerGame.style.display = "none";
-        //         leaderboardBtn.style.display = "none";
-                
-        //         // Clear the userId to prevent issues on the next sign-in
-        //         userId = null;
-        //         userScore = 0; // Reset local score to avoid issues
-        //         scoreDisplay.textContent = userScore;
-        //     });
-        // };
+    // Clicker game logic: increment score and update Firestore
+    clickerBtn.addEventListener("click", () => {
+      if (!currentUser) {
+        alert("Please sign in first!");
+        return;
+      }
+      score++;
+      scoreDisplay.innerText = `Score: ${score}`;
+      db.collection("users").doc(currentUser.uid)
+        .set({ score: score, name: currentUser.displayName }, { merge: true })
+        .then(() => {
+          console.log("Score updated:", score);
+          loadLeaderboard();
+        })
+        .catch(error => console.error("Error updating score:", error));
+    });
 
-        // // Load user data after sign-in
-        // function loadUserScore() {
-        //     if (userId) {
-        //         db.collection("users").doc(userId).get().then(doc => {
-        //             if (doc.exists) {
-        //                 userScore = doc.data().score || 0; // Set score from Firestore or default to 0
-        //                 scoreDisplay.textContent = userScore;
-        //             } else {
-        //                 // If the document doesn't exist, initialize it with 0 score
-        //                 db.collection("users").doc(userId).set({
-        //                     score: 0
-        //                 });
-        //             }
-        //         });
-        //     }
-        // }
+    // Friend System: Search for a user by display name
+    friendSearchBtn.addEventListener("click", () => {
+      const searchName = friendSearchInput.value.trim();
+      if (!searchName) {
+        alert("Please enter a username to search.");
+        return;
+      }
+      // Clear previous search results
+      friendSearchResultDiv.innerHTML = "";
+      // Search the "users" collection for a matching name
+      db.collection("users")
+        .where("name", "==", searchName)
+        .get()
+        .then(snapshot => {
+          if (snapshot.empty) {
+            friendSearchResultDiv.innerHTML = `<p>User not found.</p>`;
+          } else {
+            snapshot.forEach(doc => {
+              // Do not allow sending a friend request to yourself
+              if (doc.id === currentUser.uid) {
+                friendSearchResultDiv.innerHTML = `<p>You cannot friend yourself.</p>`;
+                return;
+              }
+              const userData = doc.data();
+              friendSearchResultDiv.innerHTML = `
+                <p>
+                  ${userData.name} (Score: ${userData.score || 0})
+                  <button onclick="sendFriendRequest('${doc.id}', '${userData.name}')">Send Friend Request</button>
+                </p>
+              `;
+            });
+          }
+        })
+        .catch(error => console.error("Error searching user:", error));
+    });
 
-        // // Sign in with Google
-        // signInBtn.onclick = () => {
-        //     const provider = new firebase.auth.GoogleAuthProvider();
-        //     auth.signInWithPopup(provider).then(result => {
-        //         const user = result.user;
-        //         userId = user.uid;
-        //         updateUI(user);  // Update UI after successful sign-in
-        //         loadUserScore();  // Load the user's score from Firestore
-        //     }).catch(error => console.error(error));
-        // };
+    // Function to send a friend request
+    function sendFriendRequest(recipientId, recipientName) {
+      if (!currentUser) {
+        alert("Please sign in first!");
+        return;
+      }
+      db.collection("friendRequests")
+        .add({
+          from: currentUser.uid,
+          fromName: currentUser.displayName,
+          to: recipientId,
+          toName: recipientName,
+          status: "pending",
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        })
+        .then(() => {
+          alert(`Friend request sent to ${recipientName}!`);
+          friendSearchResultDiv.innerHTML = "";
+          friendSearchInput.value = "";
+        })
+        .catch(error => console.error("Error sending friend request:", error));
+    }
 
-        // // Update the user's score in Firestore
-        // function updateUserScore() {
-        //     if (userId) {
-        //         db.collection("users").doc(userId).update({ score: userScore })
-        //             .then(() => {
-        //                 scoreDisplay.textContent = userScore;
-        //             }).catch(error => console.error(error));
-        //     }
-        // }
+    // Accept Friend Request
+    function acceptFriendRequest(requestId) {
+      if (!currentUser) {
+        alert("Please sign in first!");
+        return;
+      }
 
-        // // Click event to increase score
-        // clickButton.onclick = () => {
-        //     userScore++;
-        //     updateUserScore(); // Update Firestore score on click
-        // };
+      db.collection("friendRequests").doc(requestId).update({ status: "accepted" })
+        .then(() => {
+          alert("Friend request accepted!");
+          addFriendToBothUsers(requestId);
+        })
+        .catch(error => console.error("Error accepting friend request:", error));
+    }
 
-        // // Update UI after sign-in
-        // function updateUI(user) {
-        //     if (user) {
-        //         userInfo.innerHTML = `<p>Welcome, ${user.displayName}</p>
-        //                               <img src="${user.photoURL}" width="50" style="border-radius:50%">`;
-        //         signInBtn.style.display = "none";
-        //         signOutBtn.style.display = "block";
-        //         clickerGame.style.display = "block";
-        //         leaderboardBtn.style.display = "block";
-        //     }
-        // }
+    // Add friend to both users' lists
+    function addFriendToBothUsers(requestId) {
+      db.collection("friendRequests").doc(requestId).get()
+        .then(doc => {
+          const data = doc.data();
+          const friendId = data.from === currentUser.uid ? data.to : data.from;
 
-        // // Check auth state on page load
-        // auth.onAuthStateChanged(user => {
-        //     if (user) {
-        //         updateUI(user);
-        //         userId = user.uid;
-        //         loadUserScore();  // Load the score for the newly signed-in user
-        //     }
-        // });
-    </script>
+          db.collection("users").doc(currentUser.uid).update({
+            friends: firebase.firestore.FieldValue.arrayUnion(friendId)
+          });
+          db.collection("users").doc(friendId).update({
+            friends: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+          });
+          loadFriendsList();
+          loadFriendRequests();
+        })
+        .catch(error => console.error("Error adding friend:", error));
+    }
+
+    // Remove Friend
+    function removeFriend(friendId) {
+      if (!currentUser) {
+        alert("Please sign in first!");
+        return;
+      }
+
+      // Remove from both users' friends list
+      db.collection("users").doc(currentUser.uid).update({
+        friends: firebase.firestore.FieldValue.arrayRemove(friendId)
+      });
+      db.collection("users").doc(friendId).update({
+        friends: firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
+      })
+      .then(() => {
+        loadFriendsList();
+      })
+      .catch(error => console.error("Error removing friend:", error));
+    }
+
+    // Load friends list
+    function loadFriendsList() {
+      if (!currentUser) return;
+
+      db.collection("users").doc(currentUser.uid).get()
+        .then(doc => {
+          const friends = doc.data().friends || [];
+          friendsListDiv.innerHTML = '';
+          friends.forEach(friendId => {
+            db.collection("users").doc(friendId).get()
+              .then(friendDoc => {
+                const friendData = friendDoc.data();
+                friendsListDiv.innerHTML += `
+                  <div>
+                    ${friendData.name} (Score: ${friendData.score || 0})
+                    <button onclick="removeFriend('${friendId}')">Remove Friend</button>
+                  </div>
+                `;
+              });
+          });
+        })
+        .catch(error => console.error("Error loading friends list:", error));
+    }
+
+    // Load friend requests
+    function loadFriendRequests() {
+      if (!currentUser) return;
+
+      db.collection("friendRequests")
+        .where("to", "==", currentUser.uid)
+        .where("status", "==", "pending")
+        .get()
+        .then(snapshot => {
+          friendRequestsDiv.innerHTML = '';
+          snapshot.forEach(doc => {
+            const requestData = doc.data();
+            friendRequestsDiv.innerHTML += `
+              <div>
+                Friend request from ${requestData.fromName}
+                <button onclick="acceptFriendRequest('${doc.id}')">Accept</button>
+              </div>
+            `;
+          });
+        })
+        .catch(error => console.error("Error loading friend requests:", error));
+    }
+
+    // Load leaderboard (update it after score changes)
+    function loadLeaderboard() {
+      db.collection("users")
+        .orderBy("score", "desc")
+        .limit(10)
+        .get()
+        .then(snapshot => {
+          leaderboardDiv.innerHTML = '<h3>Leaderboard</h3>';
+          snapshot.forEach(doc => {
+            const userData = doc.data();
+            leaderboardDiv.innerHTML += `
+              <p>${userData.name} - Score: ${userData.score || 0}</p>
+            `;
+          });
+        })
+        .catch(error => console.error("Error loading leaderboard:", error));
+    }
+  </script>
 </body>
 </html>
